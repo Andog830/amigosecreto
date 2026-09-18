@@ -1,0 +1,476 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ nombre }} - FUA - Amigo Secreto 🥵</title>
+    <style>
+        /* ---------- Reset y fondo ---------- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', cursive, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px 60px;
+            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #84fab0, #8fd3f4);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #2d1b4e;
+        }
+
+        @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ---------- Encabezado del dashboard ---------- */
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 35px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            text-align: center;
+            color: #fff;
+            text-shadow:
+                2px 2px 0 #ff5e94,
+                4px 4px 0 #7b2ff7,
+                6px 6px 12px rgba(0,0,0,.25);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            animation: bounce 2.5s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) rotate(-1deg); }
+            50%      { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        /* ---------- Mensaje general ---------- */
+        .mensaje {
+            display: inline-block;
+            background: rgba(255,255,255,.85);
+            color: #7b2ff7;
+            font-size: 1rem;
+            padding: 10px 22px;
+            border-radius: 30px;
+            border: 3px dashed #ff5e94;
+            box-shadow: 0 4px 0 #c2a3ff;
+            margin-top: 5px;
+        }
+
+        /* ---------- Grid de tarjetas ---------- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            width: min(1100px, 95vw);
+            margin-bottom: 30px;
+        }
+
+        /* ---------- Tarjeta ---------- */
+        .card {
+            background: #fffef9;
+            padding: 25px;
+            border-radius: 25px;
+            border: 4px dashed #ffb3d1;
+            box-shadow:
+                0 8px 0 #ff5e94,
+                0 12px 25px rgba(123, 47, 247, .25);
+            transition: transform .25s ease, box-shadow .25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-4px) rotate(-0.5deg);
+            box-shadow:
+                0 12px 0 #7b2ff7,
+                0 16px 30px rgba(255, 94, 148, .35);
+        }
+
+        /* Borde y sombra distinta por tipo de tarjeta */
+        .card.card-amigo {
+            border-color: #c2a3ff;
+            box-shadow:
+                0 8px 0 #7b2ff7,
+                0 12px 25px rgba(123, 47, 247, .25);
+        }
+
+        .card.card-deseo {
+            border-color: #ffd6a5;
+            box-shadow:
+                0 8px 0 #f4a261,
+                0 12px 25px rgba(244, 162, 97, .3);
+        }
+
+        .card.card-deseo-amigo {
+            border-color: #a8e6cf;
+            box-shadow:
+                0 8px 0 #41c48b,
+                0 12px 25px rgba(65, 196, 139, .3);
+        }
+
+        /* ---------- Título de cada tarjeta ---------- */
+        .card h2 {
+            font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+            color: #7b2ff7;
+            text-align: center;
+            background: rgba(243, 236, 255, .8);
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 3px 0 #c2a3ff;
+            margin-bottom: 4px;
+            transform: rotate(-1deg);
+        }
+
+        .card.card-deseo h2 {
+            color: #e76f51;
+            background: rgba(255, 237, 213, .9);
+            box-shadow: 0 3px 0 #f4a261;
+            transform: rotate(1deg);
+        }
+
+        .card.card-deseo-amigo h2 {
+            color: #2d8a63;
+            background: rgba(216, 243, 220, .9);
+            box-shadow: 0 3px 0 #84fab0;
+            transform: rotate(-1deg);
+        }
+
+        /* ---------- Texto dentro de la tarjeta ---------- */
+        .card p {
+            font-size: 1rem;
+            line-height: 1.5;
+            text-align: center;
+            color: #3d2c63;
+        }
+
+        /* ---------- Destacado (nombre del amigo, deseo) ---------- */
+        .destacado {
+            display: block;
+            font-size: clamp(1.4rem, 4vw, 1.9rem);
+            font-weight: 900;
+            color: #fff;
+            background: linear-gradient(135deg, #ff5e94, #7b2ff7);
+            background-size: 200% 200%;
+            animation: gradientMove 5s ease infinite;
+            padding: 16px 12px;
+            border-radius: 18px;
+            margin: 8px 0;
+            text-shadow: 2px 2px 0 #4a1a9e;
+            box-shadow:
+                0 6px 0 #4a1a9e,
+                0 10px 20px rgba(123, 47, 247, .4);
+            word-break: break-word;
+        }
+
+        .card.card-deseo .destacado {
+            background: linear-gradient(135deg, #f4a261, #e76f51);
+            background-size: 200% 200%;
+            text-shadow: 2px 2px 0 #b5421a;
+            box-shadow:
+                0 6px 0 #b5421a,
+                0 10px 20px rgba(244, 162, 97, .4);
+        }
+
+        .card.card-deseo-amigo .destacado {
+            background: linear-gradient(135deg, #84fab0, #41c48b);
+            background-size: 200% 200%;
+            text-shadow: 2px 2px 0 #2d8a63;
+            box-shadow:
+                0 6px 0 #2d8a63,
+                0 10px 20px rgba(65, 196, 139, .4);
+        }
+
+        @keyframes gradientMove {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ---------- Placeholder cuando no hay dato ---------- */
+        .placeholder {
+            font-size: .95rem;
+            color: #8a7ba8;
+            font-style: italic;
+            text-align: center;
+            padding: 12px;
+            background: rgba(243, 236, 255, .5);
+            border-radius: 15px;
+            border: 2px dashed #c2a3ff;
+        }
+
+        /* ---------- Inputs ---------- */
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 1rem;
+            font-family: inherit;
+            border: 3px solid #7b2ff7;
+            border-radius: 15px;
+            background: #f3ecff;
+            color: #2d1b4e;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            resize: vertical;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #ff5e94;
+            box-shadow: 0 0 0 4px rgba(255, 94, 148, .3);
+        }
+
+        textarea {
+            min-height: 80px;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #a18cd1;
+        }
+
+        /* ---------- Errores ---------- */
+        .errorlist {
+            margin: 0;
+            color: #b42318;
+            list-style: none;
+            text-align: center;
+            font-size: .85rem;
+        }
+
+        .errorlist li {
+            background: #ffe1e1;
+            border: 2px dashed #ff5e94;
+            border-radius: 12px;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+        }
+
+        /* ---------- Botones ---------- */
+        button {
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(135deg, #ff5e94, #7b2ff7);
+            border: none;
+            padding: 13px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow:
+                0 6px 0 #4a1a9e,
+                0 10px 20px rgba(123, 47, 247, .4);
+            transition: transform .1s, box-shadow .1s;
+            letter-spacing: 1px;
+            width: 100%;
+            margin-top: 6px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 8px 0 #4a1a9e,
+                0 14px 25px rgba(255, 94, 148, .5);
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow:
+                0 2px 0 #4a1a9e,
+                0 4px 10px rgba(0,0,0,.2);
+        }
+
+        /* Botón específico de "Sortear" (destacado) */
+        .btn-sortear {
+            background: linear-gradient(135deg, #f4a261, #e76f51);
+            box-shadow:
+                0 6px 0 #b5421a,
+                0 10px 20px rgba(244, 162, 97, .4);
+        }
+
+        .btn-sortear:hover {
+            box-shadow:
+                0 8px 0 #b5421a,
+                0 14px 25px rgba(231, 111, 81, .5);
+        }
+
+        .btn-sortear:active {
+            box-shadow:
+                0 2px 0 #b5421a,
+                0 4px 10px rgba(0,0,0,.2);
+        }
+
+        /* Botón específico de "Guardar deseo" */
+        .btn-deseo {
+            background: linear-gradient(135deg, #84fab0, #41c48b);
+            box-shadow:
+                0 6px 0 #2d8a63,
+                0 10px 20px rgba(65, 196, 139, .4);
+        }
+
+        .btn-deseo:hover {
+            box-shadow:
+                0 8px 0 #2d8a63,
+                0 14px 25px rgba(65, 196, 139, .5);
+        }
+
+        .btn-deseo:active {
+            box-shadow:
+                0 2px 0 #2d8a63,
+                0 4px 10px rgba(0,0,0,.2);
+        }
+
+        button:disabled {
+            cursor: wait;
+            opacity: .7;
+            transform: none;
+        }
+
+        /* ---------- Enlaces ---------- */
+        a {
+            display: inline-block;
+            font-size: 1rem;
+            color: #7b2ff7;
+            text-decoration: none;
+            cursor: pointer;
+            border-bottom: 2px dotted #ff5e94;
+            transition: color .2s, transform .2s;
+        }
+
+        a:hover {
+            color: #ff5e94;
+            transform: translateX(4px) rotate(1deg);
+        }
+
+        /* ---------- Pie con cerrar sesión ---------- */
+        .footer-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+            width: min(1100px, 95vw);
+        }
+
+        .logout-link {
+            background: rgba(255,255,255,.85);
+            padding: 12px 26px;
+            border-radius: 30px;
+            border: 3px solid #ff5e94;
+            box-shadow: 0 5px 0 #c2a3ff;
+            color: #7b2ff7;
+            font-weight: bold;
+            border-bottom: 3px solid #ff5e94; /* anula el dotted */
+        }
+
+        .logout-link:hover {
+            background: #ff5e94;
+            color: #fff;
+            transform: translateY(-2px) rotate(-1deg);
+        }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 480px) {
+            body {
+                padding: 25px 12px 40px;
+            }
+            .card {
+                padding: 20px 16px;
+            }
+            button {
+                font-size: 1rem;
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <h1>Hola {{ nombre }}</h1>
+        {% if mensaje %}
+            <p class="mensaje">💬 {{ mensaje }}</p>
+        {% endif %}
+    </div>
+
+    <div class="dashboard-grid">
+
+        <!-- ═══════ TARJETA: AMIGO ASIGNADO ═══════ -->
+        <section class="card card-amigo">
+            <h2>🎁 Amigo asignado</h2>
+            {% if amigo_asignado %}
+                <p>Su amigo asignado es:</p>
+                <span class="destacado">{{ amigo_asignado }}</span>
+            {% else %}
+                <p class="placeholder">Aún no ha sorteado su amigo.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="sortear">
+                    <button type="submit" class="btn-sortear">🎲 Sortear amigo</button>
+                </form>
+            {% endif %}
+        </section>
+
+        <!-- ═══════ TARJETA: MI DESEO ═══════ -->
+        <section class="card card-deseo">
+            <h2>💝 Mi deseo</h2>
+            {% if tiene_deseo %}
+                <p>Su deseo ya fue registrado:</p>
+                <span class="destacado">{{ deseo_existente }}</span>
+            {% else %}
+                <form method="post" class="form-deseo">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="deseo">
+                    {{ deseo_form.non_field_errors }}
+                    {{ deseo_form.deseo.errors }}
+                    {{ deseo_form.deseo }}
+                    <button type="submit" class="btn-deseo">✨ Guardar deseo</button>
+                </form>
+            {% endif %}
+        </section>
+
+        <!-- ═══════ TARJETA: DESEO DEL AMIGO ═══════ -->
+        {% if amigo_asignado %}
+            <section class="card card-deseo-amigo">
+                <h2>🕵️ Deseo de mi amigo asignado</h2>
+                {% if deseo_amigo %}
+                    <p>Esto es lo que desea su amigo secreto:</p>
+                    <span class="destacado">{{ deseo_amigo }}</span>
+                {% else %}
+                    <p class="placeholder">Su amigo aún no ha registrado su deseo. ¡Paciencia! ⏳</p>
+                {% endif %}
+            </section>
+        {% endif %}
+
+    </div>
+
+    <div class="footer-actions">
+        <a href="{% url 'cerrar_sesion' %}" class="logout-link">🚪 Cerrar sesión</a>
+    </div>
+
+    <script>
+        document.querySelector('.form-deseo')?.addEventListener('submit', (event) => {
+            const form = event.currentTarget;
+            form.querySelector('textarea').readOnly = true;
+            form.querySelector('.btn-deseo').disabled = true;
+        });
+    </script>
+</body>
+</html>

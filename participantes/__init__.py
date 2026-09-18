@@ -1,0 +1,1 @@
+"""Aplicación de participantes del amigo secreto."""
