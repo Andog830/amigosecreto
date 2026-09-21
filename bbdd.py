@@ -32,7 +32,7 @@ def obtener_amigo_secreto(id):
         return "Ese id no está en la lista de amigos."
 
     # 2. Validar que no tenga ya un amigo asignado
-    if cursor.execute("SELECT 1 FROM AMIGOSECRETO WHERE ID = ?", (id,)).fetchone():
+    if cursor.execute("SELECT 1 FROM AMIGOSECRETO WHERE ID = %s", (id,)).fetchone():
         return f"{id} ya tiene un amigo secreto asignado."
 
     asignaciones = dict(cursor.execute("SELECT ID, ID_AMIGO FROM AMIGOSECRETO").fetchall())
@@ -64,7 +64,7 @@ def obtener_amigo_secreto(id):
         if amigos_disponibles and amigos_disponibles[0] != id:
             amigo = amigos_disponibles[0]
             cursor.execute(
-                "INSERT INTO AMIGOSECRETO (ID, ID_AMIGO) VALUES (?, ?)",
+                "INSERT INTO AMIGOSECRETO (ID, ID_AMIGO) VALUES (%s, %s)",
                 (id, amigo),
             )
         elif asignaciones:
@@ -73,11 +73,11 @@ def obtener_amigo_secreto(id):
             persona_anterior = random.choice(list(asignaciones))
             amigo_anterior = asignaciones[persona_anterior]
             cursor.execute(
-                "UPDATE AMIGOSECRETO SET ID_AMIGO = ? WHERE ID = ?",
+                "UPDATE AMIGOSECRETO SET ID_AMIGO = %s WHERE ID = %s",
                 (id, persona_anterior),
             )
             cursor.execute(
-                "INSERT INTO AMIGOSECRETO (ID, ID_AMIGO) VALUES (?, ?)",
+                "INSERT INTO AMIGOSECRETO (ID, ID_AMIGO) VALUES (%s, %s)",
                 (id, amigo_anterior),
             )
             amigo = amigo_anterior
@@ -101,7 +101,7 @@ def obtener_amigo_secreto(id):
             return "No hay amigos disponibles para asignar."
 
         cursor.execute(
-            "INSERT INTO AMIGOSECRETO (ID, ID_AMIGO) VALUES (?, ?)",
+            "INSERT INTO AMIGOSECRETO (ID, ID_AMIGO) VALUES (%s, %s)",
             (id, amigo),
         )
 
@@ -113,7 +113,7 @@ def registrar_deseo(id, deseo):
     DESEOS_LISTOS = [fila[0] for fila in cursor.execute("SELECT ID FROM DESEOS").fetchall()]
 
     if id not in DESEOS_LISTOS and deseo.strip():
-        cursor.execute("""INSERT INTO DESEOS (ID, DESEO) VALUES (?, ?)""", (id, deseo,))
+        cursor.execute("""INSERT INTO DESEOS (ID, DESEO) VALUES (%s, %s)""", (id, deseo,))
 
     bd.commit()
 
@@ -196,7 +196,7 @@ def obtener_clave(id, codigo):
                 sust = random.choice(sustantivos)
                 adj = random.choice(adjetivos)
                 password = f"{sust} {adj}"
-                cursor.execute("""INSERT INTO CREDENCIALES (ID, CLAVE) VALUES (?, ?)""", (id, password))
+                cursor.execute("""INSERT INTO CREDENCIALES (ID, CLAVE) VALUES (%s, %s)""", (id, password))
                 bd.commit()
                 return password
         return "Código incorrecto"
@@ -214,18 +214,18 @@ def obtener_participantes():
 
 
 def obtener_nombre(id):
-    participante = cursor.execute("SELECT NOMBRE FROM PARTICIPANTES WHERE ID = ?", (id,)).fetchone()
+    participante = cursor.execute("SELECT NOMBRE FROM PARTICIPANTES WHERE ID = %s", (id,)).fetchone()
     return participante[0] if participante else id
 
 def verificar_amigo_asignado(id):
-    amigo = cursor.execute("""SELECT ID_AMIGO FROM AMIGOSECRETO WHERE ID = ?""", (id,)).fetchone()
+    amigo = cursor.execute("""SELECT ID_AMIGO FROM AMIGOSECRETO WHERE ID = %s""", (id,)).fetchone()
     if amigo:
         return amigo[0]
     else:
         return "Debes sortear un amigo secreto primero."
 
 def obtener_deseo(id):
-    deseo = cursor.execute("""SELECT DESEO FROM DESEOS WHERE ID = ?""", (id,)).fetchone()
+    deseo = cursor.execute("""SELECT DESEO FROM DESEOS WHERE ID = %s""", (id,)).fetchone()
     if deseo:
         return deseo[0]
     else:
