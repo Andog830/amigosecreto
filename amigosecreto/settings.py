@@ -84,13 +84,13 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=(f'sqlite:///{BASE_DIR / "db.sqlite3"}' if not DATABASE_URL else DATABASE_URL),
+        default=(DATABASE_URL or f'sqlite:///{BASE_DIR / "db.sqlite3"}'),
         conn_max_age=600,
     )
 }
 
-# En Render, DATABASE_URL debe apuntar a PostgreSQL. Si no existe, la app
-# sigue usando SQLite solo como fallback local para pruebas.
+# En Render, la variable DATABASE_URL debe apuntar a PostgreSQL.
+# Si no existe, se usa SQLite como fallback local únicamente para pruebas.
 
 
 # Password validation

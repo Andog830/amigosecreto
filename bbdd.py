@@ -1,7 +1,5 @@
 import os
-import sqlite3
 import random
-from pathlib import Path
 
 import psycopg
 
@@ -9,13 +7,12 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
     bd = psycopg.connect(DATABASE_URL)
-    cursor = bd.cursor()
 else:
-    bd = sqlite3.connect(
-        Path(__file__).resolve().parent / 'endulzada.sqlite3',
-        check_same_thread=False,
+    raise RuntimeError(
+        'Falta DATABASE_URL. La app debe usar la base de datos PostgreSQL de Render.'
     )
-    cursor = bd.cursor()
+
+cursor = bd.cursor()
 
 AMIGOS = tuple(
     fila[0] for fila in cursor.execute("SELECT ID FROM PARTICIPANTES").fetchall()
