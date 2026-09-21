@@ -1,13 +1,21 @@
+import os
 import sqlite3
 import random
 from pathlib import Path
 
-bd = sqlite3.connect(
-    Path(__file__).resolve().parent / 'endulzada.sqlite3',
-    check_same_thread=False,
-)
+import psycopg
 
-cursor = bd.cursor()
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    bd = psycopg.connect(DATABASE_URL)
+    cursor = bd.cursor()
+else:
+    bd = sqlite3.connect(
+        Path(__file__).resolve().parent / 'endulzada.sqlite3',
+        check_same_thread=False,
+    )
+    cursor = bd.cursor()
 
 AMIGOS = tuple(
     fila[0] for fila in cursor.execute("SELECT ID FROM PARTICIPANTES").fetchall()
