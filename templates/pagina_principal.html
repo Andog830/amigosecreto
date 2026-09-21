@@ -321,114 +321,77 @@
 
         /* ---------- Máquina tragamonedas ---------- */
 
-        .slot-machine {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin: 8px 0;
-        }
-
-        .slot-window {
-            width: 100%;
-            max-width: 320px;
-            height: 82px;
-            overflow: hidden;
+        .slot-display {
             position: relative;
+            overflow: hidden;
+            min-height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
-
-            background: linear-gradient(135deg, #2d1b4e, #4a1a9e);
-            border: 5px solid #c2a3ff;
-            border-radius: 18px;
-
-            box-shadow:
-                inset 0 0 15px rgba(0,0,0,.45),
-                0 6px 0 #7b2ff7,
-                0 10px 20px rgba(123, 47, 247, .3);
+            perspective: 500px;
         }
 
-        .slot-window::before,
-        .slot-window::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 18px;
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        .slot-window::before {
-            top: 0;
-            background: linear-gradient(
-                to bottom,
-                rgba(45,27,78,.95),
-                transparent
-            );
-        }
-
-        .slot-window::after {
-            bottom: 0;
-            background: linear-gradient(
-                to top,
-                rgba(45,27,78,.95),
-                transparent
-            );
-        }
-
-        .slot-name {
+        .slot-display #slot-name {
+            display: block;
             width: 100%;
             text-align: center;
-            color: #fff;
-            font-size: clamp(1.4rem, 5vw, 2rem);
-            font-weight: 900;
-            text-shadow:
-                2px 2px 0 #ff5e94,
-                4px 4px 0 #7b2ff7;
-
-            transform: translateY(0);
+            will-change: transform, filter, opacity;
         }
 
-        .slot-machine.spinning .slot-window {
-            animation: slotShake .12s infinite;
+        .slot-display.spinning #slot-name {
+            animation: slotFlicker .09s infinite;
         }
 
-        .slot-machine.spinning .slot-name {
-            animation: slotBlur .12s infinite;
-        }
-
-        @keyframes slotShake {
-            0%   { transform: translateX(-1px); }
-            50%  { transform: translateX(1px); }
-            100% { transform: translateX(-1px); }
-        }
-
-        @keyframes slotBlur {
+        @keyframes slotFlicker {
             0% {
-                filter: blur(0);
-                transform: translateY(-4px);
+                transform: translateY(-5px) scaleY(.95);
+                filter: blur(1px);
+                opacity: .85;
             }
+
             50% {
-                filter: blur(3px);
-                transform: translateY(4px);
+                transform: translateY(5px) scaleY(1.03);
+                filter: blur(2px);
+                opacity: 1;
             }
+
             100% {
-                filter: blur(0);
-                transform: translateY(-4px);
+                transform: translateY(-5px) scaleY(.95);
+                filter: blur(1px);
+                opacity: .85;
             }
         }
 
-        .slot-status {
-            font-size: .95rem !important;
-            font-weight: bold;
-            color: #7b2ff7 !important;
-            min-height: 24px;
+        /* Efecto de brillo durante el giro */
+        .slot-display.spinning::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(
+                180deg,
+                transparent 0%,
+                rgba(255,255,255,.18) 45%,
+                rgba(255,255,255,.35) 50%,
+                transparent 55%
+            );
+            animation: slotLight .7s linear infinite;
         }
 
+        @keyframes slotLight {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(100%);
+            }
+        }
+
+        /* El botón mientras está haciendo el sorteo */
         #btn-sortear.spinning {
             cursor: wait;
-            opacity: .75;
+            opacity: .7;
         }
 
         /* Botón específico de "Guardar deseo" */
@@ -532,17 +495,11 @@
                 <p>Su amigo asignado es:</p>
                 <span class="destacado">{{ amigo_asignado }}</span>
             {% else %}
-                <p>¡Prepárese para descubrir a su amigo secreto!</p>
+                <p>Su amigo asignado es:</p>
 
-                <div class="slot-machine" id="slot-machine">
-                    <div class="slot-window">
-                        <div class="slot-name" id="slot-name">Ana Belen</div>
-                    </div>
+                <div class="destacado slot-display" id="slot-display">
+                    <span id="slot-name">Ana Belen</span>
                 </div>
-
-                <p class="slot-status" id="slot-status">
-                    🎲 Listo para sortear...
-                </p>
 
                 <form method="post" id="form-sortear">
                     {% csrf_token %}
@@ -601,7 +558,7 @@
         });
 
 
-        /* ---------- Animación del sorteo ---------- */
+        /* ---------- Sorteo tipo tragamonedas ---------- */
 
         const formSortear = document.getElementById('form-sortear');
 
@@ -619,65 +576,169 @@
                 'Sergio'
             ];
 
-            const slotMachine = document.getElementById('slot-machine');
+            const slotDisplay = document.getElementById('slot-display');
             const slotName = document.getElementById('slot-name');
-            const slotStatus = document.getElementById('slot-status');
             const btnSortear = document.getElementById('btn-sortear');
 
-            formSortear.addEventListener('submit', function(event) {
+            formSortear.addEventListener('submit', async (event) => {
 
-                /*
-                * Evitamos que el formulario se envíe inmediatamente.
-                * Primero mostramos la animación.
-                */
                 event.preventDefault();
 
                 btnSortear.disabled = true;
                 btnSortear.classList.add('spinning');
-
-                slotMachine.classList.add('spinning');
-
-                slotStatus.textContent = '🎰 ¡SORTEANDO...!';
-
-                let indice = 0;
-                let velocidad = 70;
+                slotDisplay.classList.add('spinning');
 
                 /*
-                * Cambiamos rápidamente los nombres al principio.
+                * Enviamos el MISMO POST que enviaba Django normalmente,
+                * pero mediante fetch().
+                *
+                * De esta forma obtenemos primero el resultado real
+                * del servidor, sin recargar todavía la página.
                 */
-                const girar = () => {
+                const formData = new FormData(formSortear);
 
-                    slotName.textContent = nombres[indice];
+                let respuesta;
+                let html;
 
-                    indice = (indice + 1) % nombres.length;
+                try {
 
-                    velocidad += 8;
+                    respuesta = await fetch(formSortear.action || window.location.href, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
 
-                    if (velocidad < 190) {
-                        setTimeout(girar, velocidad);
+                    html = await respuesta.text();
+
+                } catch (error) {
+
+                    /*
+                    * Si falla la petición, devolvemos el formulario
+                    * a su estado original.
+                    */
+                    slotDisplay.classList.remove('spinning');
+                    btnSortear.classList.remove('spinning');
+                    btnSortear.disabled = false;
+
+                    return;
+                }
+
+
+                /*
+                * Extraemos de la respuesta HTML el nombre que Django
+                * realmente sorteó.
+                */
+                const documento = new DOMParser().parseFromString(
+                    html,
+                    'text/html'
+                );
+
+                const resultado = documento.querySelector(
+                    '.card-amigo .destacado'
+                );
+
+                const amigoSorteado = resultado
+                    ? resultado.textContent.trim()
+                    : null;
+
+
+                /*
+                * Si por alguna razón no encontramos el resultado,
+                * simplemente recargamos la página.
+                */
+                if (!amigoSorteado) {
+                    window.location.reload();
+                    return;
+                }
+
+
+                /*
+                * Ahora empieza la animación.
+                *
+                * IMPORTANTE:
+                * El resultado YA lo conocemos.
+                * Por eso podemos hacer que el último nombre
+                * sea exactamente el que devolvió Django.
+                */
+
+                let vueltas = 0;
+                const vueltasTotales = 28;
+
+                let intervalo = 55;
+
+
+                const siguienteNombre = () => {
+
+                    /*
+                    * Durante casi toda la animación mostramos nombres
+                    * aleatorios de la lista.
+                    */
+                    if (vueltas < vueltasTotales) {
+
+                        let nombre;
+
+                        do {
+                            nombre = nombres[
+                                Math.floor(Math.random() * nombres.length)
+                            ];
+                        } while (
+                            nombres.length > 1 &&
+                            nombre === slotName.textContent
+                        );
+
+                        slotName.textContent = nombre;
+
+                        vueltas++;
+
+                        /*
+                        * Desaceleración progresiva.
+                        */
+                        intervalo += 7;
+
+                        setTimeout(siguienteNombre, intervalo);
+
                     } else {
 
                         /*
-                        * Terminamos la animación.
-                        * El nombre que queda aquí NO es el resultado real.
-                        * El resultado real lo determina Django.
+                        * ESTE ES EL ÚLTIMO GIRO.
+                        *
+                        * El nombre que aparece aquí es exactamente
+                        * el que sorteó Django.
                         */
-
-                        slotMachine.classList.remove('spinning');
-
-                        slotStatus.textContent = '🎁 ¡Amigo sorteado!';
+                        slotName.textContent = amigoSorteado;
 
                         /*
-                        * Pequeña pausa dramática antes de enviar
-                        * el formulario al servidor.
+                        * Dejamos que el nombre final permanezca
+                        * dentro del mismo recuadro.
                         */
                         setTimeout(() => {
-                            formSortear.submit();
-                        }, 700);
+
+                            slotDisplay.classList.remove('spinning');
+                            btnSortear.classList.remove('spinning');
+
+                            /*
+                            * Finalmente mostramos la página real
+                            * devuelta por Django.
+                            *
+                            * Así también quedan actualizados todos
+                            * los datos de sesión/contexto.
+                            */
+                            document.open();
+                            document.write(html);
+                            document.close();
+
+                        }, 500);
                     }
                 };
 
-                girar();
+
+                /*
+                * Ana Belen es el estado inicial.
+                * El primer cambio ocurre después de comenzar el giro.
+                */
+                setTimeout(siguienteNombre, 150);
             });
         }
     </script>
