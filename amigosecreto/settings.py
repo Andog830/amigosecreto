@@ -23,18 +23,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-only-secret-key-for-local-testing')
 
-ALLOWED_HOSTS = os.environ.get(
-    'ALLOWED_HOSTS',
-    'localhost,127.0.0.1,testserver,amigosecreto-9ljz.onrender.com',
-).split(',')
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
+if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
+    ALLOWED_HOSTS.append(os.environ["RENDER_EXTERNAL_HOSTNAME"])
 
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-CSRF_TRUSTED_ORIGINS = os.environ.get(
-    'CSRF_TRUSTED_ORIGINS',
-    'https://amigosecreto-9ljz.onrender.com',
-).split(',')
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://amigosecreto-9ljz.onrender.com",
+]
 
 # Application definition
 
