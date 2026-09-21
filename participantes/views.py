@@ -56,7 +56,7 @@ def pagina_principal(request):
 
     mensaje = None
     deseo_existente = obtener_deseo(participante_id)
-    tiene_deseo = deseo_existente != 'Su amigo aún no ha registrado su deseo. ¡Paciencia!'
+    tiene_deseo = deseo_existente != 'Su amigo aún no ha registrado su deseo. ¡Paciencita!'
     deseo_form = DeseoForm(request.POST or None)
     if request.method == 'POST':
         accion = request.POST.get('accion')

@@ -229,4 +229,4 @@ def obtener_deseo(id):
     if deseo:
         return deseo[0]
     else:
-        return "Su amigo aún no ha registrado su deseo. ¡Paciencia!"
+        return "Su amigo aún no ha registrado su deseo. ¡Paciencita!"

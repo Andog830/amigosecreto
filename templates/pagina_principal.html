@@ -319,6 +319,118 @@
                 0 4px 10px rgba(0,0,0,.2);
         }
 
+        /* ---------- Máquina tragamonedas ---------- */
+
+        .slot-machine {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 8px 0;
+        }
+
+        .slot-window {
+            width: 100%;
+            max-width: 320px;
+            height: 82px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: linear-gradient(135deg, #2d1b4e, #4a1a9e);
+            border: 5px solid #c2a3ff;
+            border-radius: 18px;
+
+            box-shadow:
+                inset 0 0 15px rgba(0,0,0,.45),
+                0 6px 0 #7b2ff7,
+                0 10px 20px rgba(123, 47, 247, .3);
+        }
+
+        .slot-window::before,
+        .slot-window::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 18px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .slot-window::before {
+            top: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(45,27,78,.95),
+                transparent
+            );
+        }
+
+        .slot-window::after {
+            bottom: 0;
+            background: linear-gradient(
+                to top,
+                rgba(45,27,78,.95),
+                transparent
+            );
+        }
+
+        .slot-name {
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-size: clamp(1.4rem, 5vw, 2rem);
+            font-weight: 900;
+            text-shadow:
+                2px 2px 0 #ff5e94,
+                4px 4px 0 #7b2ff7;
+
+            transform: translateY(0);
+        }
+
+        .slot-machine.spinning .slot-window {
+            animation: slotShake .12s infinite;
+        }
+
+        .slot-machine.spinning .slot-name {
+            animation: slotBlur .12s infinite;
+        }
+
+        @keyframes slotShake {
+            0%   { transform: translateX(-1px); }
+            50%  { transform: translateX(1px); }
+            100% { transform: translateX(-1px); }
+        }
+
+        @keyframes slotBlur {
+            0% {
+                filter: blur(0);
+                transform: translateY(-4px);
+            }
+            50% {
+                filter: blur(3px);
+                transform: translateY(4px);
+            }
+            100% {
+                filter: blur(0);
+                transform: translateY(-4px);
+            }
+        }
+
+        .slot-status {
+            font-size: .95rem !important;
+            font-weight: bold;
+            color: #7b2ff7 !important;
+            min-height: 24px;
+        }
+
+        #btn-sortear.spinning {
+            cursor: wait;
+            opacity: .75;
+        }
+
         /* Botón específico de "Guardar deseo" */
         .btn-deseo {
             background: linear-gradient(135deg, #84fab0, #41c48b);
@@ -415,15 +527,29 @@
         <!-- ═══════ TARJETA: AMIGO ASIGNADO ═══════ -->
         <section class="card card-amigo">
             <h2>🎁 Amigo asignado</h2>
+
             {% if amigo_asignado %}
                 <p>Su amigo asignado es:</p>
                 <span class="destacado">{{ amigo_asignado }}</span>
             {% else %}
-                <p class="placeholder">Aún no ha sorteado su amigo.</p>
-                <form method="post">
+                <p>¡Prepárese para descubrir a su amigo secreto!</p>
+
+                <div class="slot-machine" id="slot-machine">
+                    <div class="slot-window">
+                        <div class="slot-name" id="slot-name">Ana Belen</div>
+                    </div>
+                </div>
+
+                <p class="slot-status" id="slot-status">
+                    🎲 Listo para sortear...
+                </p>
+
+                <form method="post" id="form-sortear">
                     {% csrf_token %}
                     <input type="hidden" name="accion" value="sortear">
-                    <button type="submit" class="btn-sortear">🎲 Sortear amigo</button>
+                    <button type="submit" class="btn-sortear" id="btn-sortear">
+                        🎲 Sortear amigo
+                    </button>
                 </form>
             {% endif %}
         </section>
@@ -454,7 +580,7 @@
                     <p>Esto es lo que desea su amigo secreto:</p>
                     <span class="destacado">{{ deseo_amigo }}</span>
                 {% else %}
-                    <p class="placeholder">Su amigo aún no ha registrado su deseo. ¡Paciencia! ⏳</p>
+                    <p class="placeholder">Su amigo aún no ha registrado su deseo. ¡Paciencita! ⏳</p>
                 {% endif %}
             </section>
         {% endif %}
@@ -466,11 +592,94 @@
     </div>
 
     <script>
+        /* ---------- Guardar deseo ---------- */
+
         document.querySelector('.form-deseo')?.addEventListener('submit', (event) => {
             const form = event.currentTarget;
             form.querySelector('textarea').readOnly = true;
             form.querySelector('.btn-deseo').disabled = true;
         });
+
+
+        /* ---------- Animación del sorteo ---------- */
+
+        const formSortear = document.getElementById('form-sortear');
+
+        if (formSortear) {
+
+            const nombres = [
+                'Ana Belen',
+                'Nicolas',
+                'Karen',
+                'Fabian',
+                'Vals',
+                'Ricaurte',
+                'Cristhian',
+                'Raul',
+                'Sergio'
+            ];
+
+            const slotMachine = document.getElementById('slot-machine');
+            const slotName = document.getElementById('slot-name');
+            const slotStatus = document.getElementById('slot-status');
+            const btnSortear = document.getElementById('btn-sortear');
+
+            formSortear.addEventListener('submit', function(event) {
+
+                /*
+                * Evitamos que el formulario se envíe inmediatamente.
+                * Primero mostramos la animación.
+                */
+                event.preventDefault();
+
+                btnSortear.disabled = true;
+                btnSortear.classList.add('spinning');
+
+                slotMachine.classList.add('spinning');
+
+                slotStatus.textContent = '🎰 ¡SORTEANDO...!';
+
+                let indice = 0;
+                let velocidad = 70;
+
+                /*
+                * Cambiamos rápidamente los nombres al principio.
+                */
+                const girar = () => {
+
+                    slotName.textContent = nombres[indice];
+
+                    indice = (indice + 1) % nombres.length;
+
+                    velocidad += 8;
+
+                    if (velocidad < 190) {
+                        setTimeout(girar, velocidad);
+                    } else {
+
+                        /*
+                        * Terminamos la animación.
+                        * El nombre que queda aquí NO es el resultado real.
+                        * El resultado real lo determina Django.
+                        */
+
+                        slotMachine.classList.remove('spinning');
+
+                        slotStatus.textContent = '🎁 ¡Amigo sorteado!';
+
+                        /*
+                        * Pequeña pausa dramática antes de enviar
+                        * el formulario al servidor.
+                        */
+                        setTimeout(() => {
+                            formSortear.submit();
+                        }, 700);
+                    }
+                };
+
+                girar();
+            });
+        }
     </script>
 </body>
 </html>
